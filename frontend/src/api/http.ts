@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getAuthToken } from "../auth/token";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api";
 

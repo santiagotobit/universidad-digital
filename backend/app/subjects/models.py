@@ -19,6 +19,7 @@ class Subject(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    teacher = relationship("User", back_populates="taught_subjects")
     enrollments = relationship("Enrollment", back_populates="subject")
 
     @validates("code")

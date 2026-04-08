@@ -10,6 +10,9 @@ import { Table } from "../../components/Table";
 import { Alert } from "../../components/Alert";
 import { gradesService } from "../../services/gradesService";
 import { enrollmentsService } from "../../services/enrollmentsService";
+import { usersService } from "../../services/usersService";
+import { subjectsService } from "../../services/subjectsService";
+import { periodsService } from "../../services/periodsService";
 import { useFetch } from "../../hooks/useFetch";
 import { getErrorMessage } from "../../utils/apiError";
 import type { GradeResponse } from "../../api/grades";
@@ -35,14 +38,31 @@ export function GradesPage() {
   );
   const { data: grades, error, isLoading, reload } = useFetch(gradesService.list, []);
   const { data: enrollments } = useFetch(enrollmentsService.list, []);
+  const { data: users } = useFetch(usersService.list, []);
+  const { data: subjects } = useFetch(subjectsService.list, []);
+  const { data: periods } = useFetch(periodsService.list, []);
 
   const createForm = useForm<CreateForm>({ resolver: zodResolver(createSchema) });
   const updateForm = useForm<UpdateForm>({ resolver: zodResolver(updateSchema) });
 
+  const usersById = new Map((users ?? []).map((user) => [user.id, user]));
+  const subjectsById = new Map((subjects ?? []).map((subject) => [subject.id, subject]));
+  const periodsById = new Map((periods ?? []).map((period) => [period.id, period]));
+  const enrollmentsById = new Map((enrollments ?? []).map((enrollment) => [enrollment.id, enrollment]));
+
+  const describeEnrollment = (enrollmentId: number) => {
+    const enrollment = enrollmentsById.get(enrollmentId);
+    if (!enrollment) return `Inscripción #${enrollmentId}`;
+    const student = usersById.get(enrollment.user_id)?.full_name ?? `Usuario #${enrollment.user_id}`;
+    const subject = subjectsById.get(enrollment.subject_id)?.name ?? `Materia #${enrollment.subject_id}`;
+    const period = periodsById.get(enrollment.period_id)?.name ?? `Periodo #${enrollment.period_id}`;
+    return `#${enrollment.id} - ${student} | ${subject} | ${period}`;
+  };
+
   const enrollmentOptions =
     enrollments?.map((enrollment) => ({
       value: String(enrollment.id),
-      label: `Inscripción #${enrollment.id}`
+      label: describeEnrollment(enrollment.id)
     })) ?? [];
 
   const handleCreate = async (values: CreateForm) => {
@@ -140,7 +160,34 @@ export function GradesPage() {
             data={grades ?? []}
             columns={[
               { header: "ID", render: (row) => row.id },
-              { header: "Inscripción", render: (row) => row.enrollment_id },
+              { header: "Inscripción", render: (row) => `#${row.enrollment_id}` },
+              {
+                header: "Estudiante",
+                render: (row) => {
+                  const enrollment = enrollmentsById.get(row.enrollment_id);
+                  return enrollment
+                    ? usersById.get(enrollment.user_id)?.full_name ?? `Usuario #${enrollment.user_id}`
+                    : "-";
+                }
+              },
+              {
+                header: "Materia",
+                render: (row) => {
+                  const enrollment = enrollmentsById.get(row.enrollment_id);
+                  return enrollment
+                    ? subjectsById.get(enrollment.subject_id)?.name ?? `Materia #${enrollment.subject_id}`
+                    : "-";
+                }
+              },
+              {
+                header: "Período",
+                render: (row) => {
+                  const enrollment = enrollmentsById.get(row.enrollment_id);
+                  return enrollment
+                    ? periodsById.get(enrollment.period_id)?.name ?? `Periodo #${enrollment.period_id}`
+                    : "-";
+                }
+              },
               { header: "Nota", render: (row) => row.value },
               { header: "Notas", render: (row) => row.notes ?? "-" }
             ]}

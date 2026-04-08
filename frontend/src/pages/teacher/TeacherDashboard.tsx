@@ -1,18 +1,13 @@
 import { useEffect } from "react";
 import { useAsync } from "../../hooks/useAsync";
 import { useToast } from "../../hooks/useToast";
-import { getTeacherStats } from "../../services/statsService";
+import { getTeacherStats, type TeacherStats } from "../../services/statsService";
 import { StatCard } from "../../components/StatCard";
 import { Spinner } from "../../components/Spinner";
 import { Alert } from "../../components/Alert";
+import { Table } from "../../components/Table";
 import { Users, BookOpen, AlertCircle } from "lucide-react";
 import "../../styles/stats.css";
-
-interface TeacherStats {
-  total_students: number;
-  total_subjects: number;
-  pending_grades: number;
-}
 
 export function TeacherDashboard() {
   const { addToast } = useToast();
@@ -121,6 +116,66 @@ export function TeacherDashboard() {
           </ul>
         </div>
       </div>
+
+      <section className="dashboard-details">
+        <div className="details-card">
+          <h2>Asignaturas asignadas</h2>
+          {stats.assigned_subjects.length === 0 ? (
+            <p>No tienes asignaturas asignadas.</p>
+          ) : (
+            <Table
+              caption="Asignaturas asignadas"
+              data={stats.assigned_subjects}
+              columns={[
+                { header: "ID", render: (subject) => subject.id },
+                { header: "Código", render: (subject) => subject.code },
+                { header: "Nombre", render: (subject) => subject.name },
+                { header: "Créditos", render: (subject) => subject.credits },
+                {
+                  header: "Activa",
+                  render: (subject) => (subject.is_active ? "Sí" : "No"),
+                },
+              ]}
+            />
+          )}
+        </div>
+
+        <div className="details-card">
+          <h2>Estudiantes asignados</h2>
+          {stats.assigned_students.length === 0 ? (
+            <p>No hay estudiantes asignados todavía.</p>
+          ) : (
+            <Table
+              caption="Estudiantes asignados"
+              data={stats.assigned_students}
+              columns={[
+                { header: "ID", render: (student) => student.id },
+                { header: "Nombre", render: (student) => student.full_name },
+                { header: "Email", render: (student) => student.email },
+              ]}
+            />
+          )}
+        </div>
+
+        <div className="details-card">
+          <h2>Calificaciones</h2>
+          {stats.grades.length === 0 ? (
+            <p>No hay calificaciones registradas aún.</p>
+          ) : (
+            <Table
+              caption="Calificaciones del docente"
+              data={stats.grades}
+              columns={[
+                { header: "ID", render: (grade) => grade.id },
+                { header: "Estudiante", render: (grade) => grade.student_name },
+                { header: "Asignatura", render: (grade) => grade.subject_name },
+                { header: "Nota", render: (grade) => (grade.value ?? "-") },
+                { header: "Notas", render: (grade) => grade.notes ?? "-" },
+              ]}
+            />
+          )}
+        </div>
+      </section>
     </div>
   );
 }

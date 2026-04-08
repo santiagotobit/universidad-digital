@@ -23,6 +23,7 @@ class User(Base):
 
     roles = relationship("Role", secondary="user_roles", back_populates="users")
     enrollments = relationship("Enrollment", back_populates="user")
+    taught_subjects = relationship("Subject", back_populates="teacher")
 
     @validates("email")
     def _normalize_email(self, _: str, value: str) -> str:

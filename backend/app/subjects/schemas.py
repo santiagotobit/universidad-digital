@@ -11,6 +11,7 @@ class SubjectCreate(BaseModel):
     code: str = Field(min_length=2, max_length=20)
     name: str = Field(min_length=3, max_length=150)
     credits: int = Field(ge=1, le=30)
+    teacher_id: int | None = Field(default=None, ge=1)
 
 
 class SubjectUpdate(BaseModel):
@@ -18,6 +19,7 @@ class SubjectUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=3, max_length=150)
     credits: int | None = Field(default=None, ge=1, le=30)
+    teacher_id: int | None = Field(default=None, ge=1)
     is_active: bool | None = None
 
 
@@ -30,5 +32,6 @@ class SubjectResponse(BaseModel):
     code: str
     name: str
     credits: int
+    teacher_id: int | None
     is_active: bool
     created_at: datetime

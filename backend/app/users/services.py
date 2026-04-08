@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError, NotFoundError
 from app.core.security import hash_password
+from app.grades.models import Grade
 from app.roles.models import Role
 from app.users.models import User
 from app.users.schemas import UserCreate, UserUpdate
@@ -88,6 +89,27 @@ def deactivate_user(db: Session, user_id: int) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def delete_user_permanently(db: Session, user_id: int) -> None:
+    """Elimina un usuario de forma permanente."""
+    user = get_user(db, user_id)
+    if user.is_active:
+        raise ConflictError("Primero desactiva el usuario antes de eliminarlo permanentemente.")
+    if user.taught_subjects:
+        for subject in user.taught_subjects:
+            subject.teacher_id = None
+    if user.enrollments:
+        enrollment_ids = [enrollment.id for enrollment in user.enrollments]
+        grades = list(
+            db.scalars(select(Grade).where(Grade.enrollment_id.in_(enrollment_ids))).all()
+        )
+        for grade in grades:
+            db.delete(grade)
+        for enrollment in user.enrollments:
+            db.delete(enrollment)
+    db.delete(user)
+    db.commit()
 
 
 def assign_role(db: Session, user_id: int, role_id: int) -> User:
