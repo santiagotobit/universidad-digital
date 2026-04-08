@@ -1,0 +1,38 @@
+{
+  "validUser": {
+    "email": "admin@ud.edu",
+    "password": "AdminPass1234",
+    "full_name": "Admin User",
+    "id": 1,
+    "is_active": true,
+    "created_at": "2024-01-01T00:00:00Z",
+    "roles": ["admin"]
+  },
+  "studentUser": {
+    "email": "estudiante@ud.edu",
+    "password": "EstudiantePass1234",
+    "full_name": "Student User",
+    "id": 2,
+    "is_active": true,
+    "created_at": "2024-01-02T00:00:00Z",
+    "roles": ["student"]
+  },
+  "teacherUser": {
+    "email": "docente@ud.edu",
+    "password": "DocentePass1234",
+    "full_name": "Teacher User",
+    "id": 3,
+    "is_active": true,
+    "created_at": "2024-01-03T00:00:00Z",
+    "roles": ["teacher"]
+  },
+  "inactiveUser": {
+    "email": "inactive@ud.edu",
+    "password": "password123",
+    "full_name": "Inactive User",
+    "id": 4,
+    "is_active": false,
+    "created_at": "2024-01-04T00:00:00Z",
+    "roles": ["student"]
+  }
+}

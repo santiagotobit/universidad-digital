@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "email": "admin@university.edu",
+      "full_name": "Administrator",
+      "password": "adminpass123",
+      "role_ids": [1]
+    },
+    {
+      "email": "student@university.edu",
+      "full_name": "John Doe",
+      "password": "student123",
+      "role_ids": [2]
+    }
+  ],
+  "subjects": [
+    {
+      "code": "MATH101",
+      "name": "Mathematics I",
+      "credits": 4
+    },
+    {
+      "code": "PHYS101",
+      "name": "Physics I",
+      "credits": 3
+    }
+  ]
+}
