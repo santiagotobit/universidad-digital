@@ -1,9 +1,0 @@
-node_modules
-dist
-coverage
-.env
-.env.*
-.git
-.gitignore
-cypress/videos
-cypress/screenshots
