@@ -4,5 +4,6 @@ export const usersService = {
   list: usersApi.listUsers,
   create: usersApi.createUser,
   update: usersApi.updateUser,
-  deactivate: usersApi.deactivateUser
+  deactivate: usersApi.deactivateUser,
+  remove: usersApi.deleteUserPermanently
 };

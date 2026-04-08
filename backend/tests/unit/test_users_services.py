@@ -1,6 +1,13 @@
 import pytest
 from unittest.mock import MagicMock
-from app.users.services import create_user, get_user, update_user, assign_role, remove_role
+from app.users.services import (
+    assign_role,
+    create_user,
+    delete_user_permanently,
+    get_user,
+    remove_role,
+    update_user,
+)
 from app.users.schemas import UserCreate, UserUpdate
 from app.core.errors import ConflictError, NotFoundError
 
@@ -151,3 +158,63 @@ class TestRemoveRole:
         mock_db.get.side_effect = [mock_user, None]
         with pytest.raises(NotFoundError, match="Rol no encontrado"):
             remove_role(mock_db, 1, 999)
+
+
+@pytest.mark.unit
+class TestDeleteUserPermanently:
+    def test_delete_user_permanently_success(self):
+        mock_db = MagicMock()
+        mock_user = MagicMock()
+        mock_user.is_active = False
+        mock_user.taught_subjects = []
+        mock_user.enrollments = []
+        mock_db.get.return_value = mock_user
+
+        delete_user_permanently(mock_db, 1)
+
+        mock_db.delete.assert_called_once_with(mock_user)
+        mock_db.commit.assert_called_once()
+
+    def test_delete_user_permanently_with_taught_subjects_unassigns_and_deletes(self):
+        mock_db = MagicMock()
+        mock_user = MagicMock()
+        mock_user.is_active = False
+        mock_subject = MagicMock()
+        mock_subject.teacher_id = 1
+        mock_user.taught_subjects = [mock_subject]
+        mock_user.enrollments = []
+        mock_db.get.return_value = mock_user
+
+        delete_user_permanently(mock_db, 1)
+
+        assert mock_subject.teacher_id is None
+        mock_db.delete.assert_called_once_with(mock_user)
+        mock_db.commit.assert_called_once()
+
+    def test_delete_user_permanently_with_enrollments_deletes_enrollments_and_grades(self):
+        mock_db = MagicMock()
+        mock_user = MagicMock()
+        mock_user.is_active = False
+        mock_user.taught_subjects = []
+        enrollment = MagicMock()
+        enrollment.id = 10
+        mock_user.enrollments = [enrollment]
+        mock_grades_result = MagicMock()
+        mock_grades_result.all.return_value = [MagicMock(), MagicMock()]
+        mock_db.scalars.return_value = mock_grades_result
+        mock_db.get.return_value = mock_user
+
+        delete_user_permanently(mock_db, 1)
+        assert mock_db.delete.call_count == 4
+        mock_db.commit.assert_called_once()
+
+    def test_delete_user_permanently_requires_inactive_user(self):
+        mock_db = MagicMock()
+        mock_user = MagicMock()
+        mock_user.is_active = True
+        mock_user.taught_subjects = []
+        mock_user.enrollments = []
+        mock_db.get.return_value = mock_user
+
+        with pytest.raises(ConflictError, match="Primero desactiva el usuario"):
+            delete_user_permanently(mock_db, 1)

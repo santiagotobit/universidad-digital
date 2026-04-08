@@ -110,11 +110,11 @@ def get_student_stats(db: Session, user_id: int) -> dict:
 def get_teacher_stats(db: Session, user_id: int) -> dict:
     """Obtiene estadísticas personalizadas para un docente."""
     
+    subject_ids_query = db.query(Subject.id).filter(Subject.teacher_id == user_id)
+
     # Contar estudiantes (a través de enrollments)
     students = db.query(func.count(func.distinct(Enrollment.user_id))).filter(
-        Enrollment.subject_id.in_(
-            db.query(Subject.id).filter(Subject.teacher_id == user_id)
-        )
+        Enrollment.subject_id.in_(subject_ids_query)
     ).scalar() or 0
 
     # Contar asignaturas
@@ -126,16 +126,69 @@ def get_teacher_stats(db: Session, user_id: int) -> dict:
     pending_grades = db.query(func.count(Grade.id)).filter(
         Grade.enrollment_id.in_(
             db.query(Enrollment.id).filter(
-                Enrollment.subject_id.in_(
-                    db.query(Subject.id).filter(Subject.teacher_id == user_id)
-                )
+                Enrollment.subject_id.in_(subject_ids_query)
             )
         ),
         or_(Grade.value.is_(None), Grade.value == 0)
     ).scalar() or 0
 
+    subject_records = db.query(Subject).filter(Subject.teacher_id == user_id).all()
+    student_records = (
+        db.query(User)
+        .join(Enrollment, Enrollment.user_id == User.id)
+        .filter(Enrollment.subject_id.in_(subject_ids_query))
+        .distinct()
+        .all()
+    )
+    grade_records = (
+        db.query(Grade, Enrollment, Subject, User)
+        .join(Enrollment, Grade.enrollment_id == Enrollment.id)
+        .join(Subject, Enrollment.subject_id == Subject.id)
+        .join(User, Enrollment.user_id == User.id)
+        .filter(Subject.teacher_id == user_id)
+        .order_by(Grade.id)
+        .all()
+    )
+
+    assigned_subjects = [
+        {
+            "id": subject.id,
+            "code": subject.code,
+            "name": subject.name,
+            "credits": subject.credits,
+            "is_active": subject.is_active,
+        }
+        for subject in subject_records
+    ]
+
+    assigned_students = [
+        {
+            "id": student.id,
+            "full_name": student.full_name,
+            "email": student.email,
+        }
+        for student in student_records
+    ]
+
+    grades = [
+        {
+            "id": grade.id,
+            "enrollment_id": enrollment.id,
+            "student_id": student.id,
+            "student_name": student.full_name,
+            "subject_id": subject.id,
+            "subject_name": subject.name,
+            "value": grade.value,
+            "notes": grade.notes,
+        }
+        for grade, enrollment, subject, student in grade_records
+    ]
+
     return {
         "total_students": students,
         "total_subjects": subjects,
         "pending_grades": pending_grades,
+        "assigned_subjects": assigned_subjects,
+        "assigned_students": assigned_students,
+        "grades": grades,
     }

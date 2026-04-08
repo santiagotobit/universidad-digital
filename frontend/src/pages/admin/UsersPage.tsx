@@ -87,6 +87,22 @@ export function UsersPage() {
     }
   };
 
+  const handleDelete = async (userId: number) => {
+    const confirmed = window.confirm(
+      "Esta acción eliminará el usuario de forma permanente. ¿Deseas continuar?"
+    );
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await usersService.remove(userId);
+      setAlert({ message: "Usuario eliminado permanentemente.", variant: "success" });
+      await reload();
+    } catch (err) {
+      setAlert({ message: getErrorMessage(err), variant: "error" });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="grid grid-2">
@@ -168,12 +184,17 @@ export function UsersPage() {
               {
                 header: "Acciones",
                 render: (row) => (
-                  <Button
-                    variant={row.is_active ? "danger" : "secondary"}
-                    onClick={() => void handleToggleActive(row.id, row.is_active)}
-                  >
-                    {row.is_active ? "Desactivar" : "Activar"}
-                  </Button>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <Button
+                      variant={row.is_active ? "danger" : "secondary"}
+                      onClick={() => void handleToggleActive(row.id, row.is_active)}
+                    >
+                      {row.is_active ? "Desactivar" : "Activar"}
+                    </Button>
+                    <Button variant="danger" onClick={() => void handleDelete(row.id)}>
+                      Eliminar
+                    </Button>
+                  </div>
                 )
               }
             ]}

@@ -222,6 +222,7 @@ class TestGetTeacherStats:
         
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []
         # Retorna: students, subjects, pending_grades
         mock_query.scalar.side_effect = [0, 0, 0]
         mock_query.in_.return_value = mock_query
@@ -240,6 +241,7 @@ class TestGetTeacherStats:
         
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []
         # students, subjects, pending_grades
         mock_query.scalar.side_effect = [15, 3, 5]
         mock_query.in_.return_value = mock_query
@@ -258,6 +260,7 @@ class TestGetTeacherStats:
         
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []
         mock_query.scalar.side_effect = [8, 2, 3]
         mock_query.in_.return_value = mock_query
         mock_query.or_.return_value = mock_query
@@ -273,6 +276,7 @@ class TestGetTeacherStats:
         
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []
         mock_query.scalar.side_effect = [10, 4, 2]
         mock_query.in_.return_value = mock_query
         mock_query.or_.return_value = mock_query

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, require_roles_dep
@@ -8,6 +8,7 @@ from app.users.schemas import UserCreate, UserResponse, UserUpdate
 from app.users.services import (
     assign_role,
     create_user,
+    delete_user_permanently,
     deactivate_user,
     get_user,
     list_users,
@@ -70,6 +71,16 @@ def deactivate_user_endpoint(
 ) -> UserResponse:
     user = deactivate_user(db, user_id)
     return UserResponse.model_validate(user, from_attributes=True)
+
+
+@router.delete("/{user_id}/permanent", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_permanently_endpoint(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_roles_dep("Administrador")),
+) -> Response:
+    delete_user_permanently(db, user_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{user_id}/roles/{role_id}", response_model=UserResponse)

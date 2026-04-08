@@ -22,10 +22,38 @@ export interface StudentStats {
   current_subjects: number;
 }
 
+export interface TeacherSubject {
+  id: number;
+  code: string;
+  name: string;
+  credits: number;
+  is_active: boolean;
+}
+
+export interface TeacherStudent {
+  id: number;
+  full_name: string;
+  email: string;
+}
+
+export interface TeacherGrade {
+  id: number;
+  enrollment_id: number;
+  student_id: number;
+  student_name: string;
+  subject_id: number;
+  subject_name: string;
+  value: number | null;
+  notes: string | null;
+}
+
 export interface TeacherStats {
   total_students: number;
   total_subjects: number;
   pending_grades: number;
+  assigned_subjects: TeacherSubject[];
+  assigned_students: TeacherStudent[];
+  grades: TeacherGrade[];
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {

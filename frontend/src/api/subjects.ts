@@ -5,6 +5,7 @@ export type SubjectResponse = {
   code: string;
   name: string;
   credits: number;
+  teacher_id: number | null;
   is_active: boolean;
   created_at: string;
 };
@@ -13,11 +14,13 @@ export type SubjectCreate = {
   code: string;
   name: string;
   credits: number;
+  teacher_id?: number;
 };
 
 export type SubjectUpdate = {
   name?: string;
   credits?: number;
+  teacher_id?: number;
   is_active?: boolean;
 };
 

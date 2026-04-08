@@ -12,7 +12,12 @@ def create_subject(db: Session, data: SubjectCreate) -> Subject:
     """Crea una materia."""
     if db.scalar(select(Subject).where(Subject.code == data.code)):
         raise ConflictError("El código de materia ya existe.")
-    subject = Subject(code=data.code, name=data.name, credits=data.credits)
+    subject = Subject(
+        code=data.code,
+        name=data.name,
+        credits=data.credits,
+        teacher_id=data.teacher_id
+    )
     db.add(subject)
     db.commit()
     db.refresh(subject)
@@ -39,6 +44,8 @@ def update_subject(db: Session, subject_id: int, data: SubjectUpdate) -> Subject
         subject.name = data.name
     if data.credits is not None:
         subject.credits = data.credits
+    if data.teacher_id is not None:
+        subject.teacher_id = data.teacher_id
     if data.is_active is not None:
         subject.is_active = data.is_active
     db.commit()

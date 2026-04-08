@@ -18,12 +18,13 @@ class TestCreateSubject:
         mock_db.add.return_value = None
         mock_db.commit.return_value = None
         mock_db.refresh.return_value = None
-        data = SubjectCreate(code="MAT01", name="Matemáticas", credits=4)
+        data = SubjectCreate(code="MAT01", name="Matemáticas", credits=4, teacher_id=1)
 
         result = create_subject(mock_db, data)
 
         assert result.code == "MAT01"
         assert result.name == "Matemáticas"
+        assert result.teacher_id == 1
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
 

@@ -7,7 +7,9 @@ import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Table } from "../../components/Table";
 import { Alert } from "../../components/Alert";
+import { Select } from "../../components/Select";
 import { subjectsService } from "../../services/subjectsService";
+import { usersService } from "../../services/usersService";
 import { useFetch } from "../../hooks/useFetch";
 import { getErrorMessage } from "../../utils/apiError";
 import type { SubjectResponse } from "../../api/subjects";
@@ -15,13 +17,15 @@ import type { SubjectResponse } from "../../api/subjects";
 const createSchema = z.object({
   code: z.string().min(2),
   name: z.string().min(3),
-  credits: z.coerce.number().min(1).max(30)
+  credits: z.coerce.number().min(1).max(30),
+  teacher_id: z.string().optional()
 });
 
 const updateSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(3).optional(),
-  credits: z.coerce.number().min(1).max(30).optional()
+  credits: z.coerce.number().min(1).max(30).optional(),
+  teacher_id: z.string().optional()
 });
 
 type CreateForm = z.infer<typeof createSchema>;
@@ -32,13 +36,29 @@ export function SubjectsPage() {
     null
   );
   const { data: subjects, error, isLoading, reload } = useFetch(subjectsService.list, []);
+  const { data: users } = useFetch(usersService.list, []);
 
   const createForm = useForm<CreateForm>({ resolver: zodResolver(createSchema) });
   const updateForm = useForm<UpdateForm>({ resolver: zodResolver(updateSchema) });
 
+  const teacherOptions = users
+    ?.filter((user) => user.roles.includes("Docente"))
+    .map((user) => ({ value: String(user.id), label: `${user.full_name} (#${user.id})` })) ?? [];
+
+  const getTeacherName = (teacherId: number | null) => {
+    if (!teacherId) return "Sin asignar";
+    const teacher = users?.find((user) => user.id === teacherId);
+    return teacher ? teacher.full_name : "Desconocido";
+  };
+
   const handleCreate = async (values: CreateForm) => {
     try {
-      await subjectsService.create(values);
+      await subjectsService.create({
+        code: values.code,
+        name: values.name,
+        credits: values.credits,
+        teacher_id: values.teacher_id ? Number(values.teacher_id) : undefined
+      });
       setAlert({ message: "Materia creada.", variant: "success" });
       createForm.reset();
       await reload();
@@ -51,7 +71,8 @@ export function SubjectsPage() {
     try {
       await subjectsService.update(Number(values.id), {
         name: values.name || undefined,
-        credits: values.credits || undefined
+        credits: values.credits || undefined,
+        teacher_id: values.teacher_id ? Number(values.teacher_id) : undefined
       });
       setAlert({ message: "Materia actualizada.", variant: "success" });
       updateForm.reset();
@@ -104,6 +125,12 @@ export function SubjectsPage() {
               {...createForm.register("credits")}
               error={createForm.formState.errors.credits?.message}
             />
+            <Select
+              label="Docente (opcional)"
+              options={[{ value: "", label: "Sin asignar" }, ...teacherOptions]}
+              {...createForm.register("teacher_id")}
+              error={createForm.formState.errors.teacher_id?.message}
+            />
             <Button type="submit">Crear</Button>
           </form>
         </div>
@@ -126,6 +153,12 @@ export function SubjectsPage() {
               {...updateForm.register("credits")}
               error={updateForm.formState.errors.credits?.message}
             />
+            <Select
+              label="Docente (opcional)"
+              options={[{ value: "", label: "Sin asignar" }, ...teacherOptions]}
+              {...updateForm.register("teacher_id")}
+              error={updateForm.formState.errors.teacher_id?.message}
+            />
             <Button type="submit" variant="secondary">
               Actualizar
             </Button>
@@ -147,6 +180,7 @@ export function SubjectsPage() {
               { header: "Código", render: (row) => row.code },
               { header: "Nombre", render: (row) => row.name },
               { header: "Créditos", render: (row) => row.credits },
+              { header: "Docente", render: (row) => getTeacherName(row.teacher_id) },
               { header: "Activo", render: (row) => (row.is_active ? "Sí" : "No") },
               {
                 header: "Acciones",

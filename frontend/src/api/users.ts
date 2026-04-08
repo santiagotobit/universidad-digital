@@ -34,3 +34,7 @@ export async function deactivateUser(id: number) {
   const { data } = await http.delete<UserResponse>(`/users/${id}`);
   return data;
 }
+
+export async function deleteUserPermanently(id: number) {
+  await http.delete(`/users/${id}/permanent`);
+}
