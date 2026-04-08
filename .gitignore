@@ -2,6 +2,7 @@
 backend/test.db
 backend/.coverage
 backend/htmlcov/
+backend/coverage.xml
 backend/.pytest_cache/
 backend/__pycache__/
 backend/tests/__pycache__/

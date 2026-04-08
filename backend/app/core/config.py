@@ -18,6 +18,19 @@ class Settings(BaseSettings):
         default="postgresql+psycopg://postgres:1234@localhost:5432/universidad",
         validation_alias=AliasChoices("APP_DATABASE_URL", "DATABASE_URL"),
     )
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _normalize_postgres_driver(cls, value: str) -> str:
+        """Usa el driver psycopg3 si la URL viene como postgres:// o postgresql:// (p. ej. Render)."""
+
+        if value.startswith("postgresql+psycopg://"):
+            return value
+        if value.startswith("postgres://"):
+            return "postgresql+psycopg://" + value.removeprefix("postgres://")
+        if value.startswith("postgresql://"):
+            return "postgresql+psycopg://" + value.removeprefix("postgresql://")
+        return value
     api_title: str = "Universidad Digital API"
     api_version: str = "1.0.0"
 
