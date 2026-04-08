@@ -120,7 +120,7 @@ Para crear usuarios de `create_test_users.py`: `cd backend && python create_test
 ```bash
 # Terminal 1: Backend
 cd backend
-python -m uvicorn app.main:app --host localhost --port 8000 --reload
+python -m uvicorn app.main:app --reload                                  #  --host localhost --port 8000 --reload
 
 # Terminal 2: Frontend
 cd frontend
