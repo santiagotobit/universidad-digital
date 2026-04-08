@@ -1,0 +1,175 @@
+# CHECKLIST DE CALIDAD — PROYECTO DE TESTING COMPLETO
+
+---
+
+## 1. Arquitectura del sistema de pruebas
+
+### Estructura
+
+* [ ] El proyecto separa claramente backend / frontend / e2e
+* [ ] Existe carpeta exclusiva tests/ o equivalente
+* [ ] No hay tests mezclados con código de producción
+* [ ] Los nombres de carpetas reflejan el nivel de prueba
+* [ ] No existen archivos monolíticos gigantes
+
+### Independencia
+
+* [ ] Los tests pueden ejecutarse sin depender de orden manual
+* [ ] No existen dependencias implícitas entre tests
+* [ ] Cada test prepara su propio estado
+* [ ] No se usan datos persistentes compartidos
+
+---
+
+## 2. Pruebas unitarias (Backend)
+
+### Cobertura funcional
+
+* [ ] Todas las funciones de negocio tienen tests
+* [ ] Se prueban valores límite
+* [ ] Se prueban valores inválidos
+* [ ] Se prueban excepciones
+* [ ] Se prueban casos normales
+
+### Calidad del test
+
+* [ ] Un test valida un comportamiento
+* [ ] No existen asserts múltiples sin relación
+* [ ] Los nombres describen comportamiento, no implementación
+* [ ] No se prueba base de datos en unit tests
+* [ ] Se usan mocks correctamente
+
+### Robustez
+
+* [ ] Los tests fallan si cambia la lógica
+* [ ] No hay asserts triviales (assert True)
+* [ ] No se prueban getters/setters simples
+* [ ] No hay sleeps ni tiempos fijos
+
+---
+
+## 3. Pruebas de componentes (Frontend)
+
+### Comportamiento
+
+* [ ] Se prueba renderizado
+* [ ] Se prueban eventos (click, input, submit)
+* [ ] Se prueban estados condicionales
+* [ ] Se prueban mensajes de error
+* [ ] Se prueban props inválidas
+
+### Aislamiento
+
+* [ ] APIs están mockeadas
+* [ ] No hay llamadas reales al backend
+* [ ] El test no depende de CSS ni estilos visuales
+
+### Claridad
+
+* [ ] Los tests describen comportamiento del usuario
+* [ ] No se prueban detalles internos del componente
+* [ ] Se usan queries semánticas (role, label, text)
+
+---
+
+## 4. Pruebas End-to-End (Cypress)
+
+### Flujo real
+
+* [ ] Existe flujo completo login → operación → confirmación
+* [ ] Se valida persistencia de datos
+* [ ] Se valida comunicación con API
+* [ ] Se validan errores del backend
+* [ ] Se validan permisos de acceso
+
+### Calidad técnica
+
+* [ ] No se usan waits fijos
+* [ ] Se usan intercepts
+* [ ] Se validan status codes
+* [ ] Se validan respuestas JSON
+* [ ] Se valida UI + API
+
+### Realismo
+
+* [ ] Detecta fallos reales
+* [ ] No solo verifica textos visibles
+* [ ] Puede fallar si backend cambia
+
+---
+
+## 5. Cobertura
+
+### Métrica
+
+* [ ] Cobertura global ≥ 90%
+* [ ] Cobertura backend ≥ 90%
+* [ ] Cobertura frontend ≥ 85%
+
+### Calidad de cobertura
+
+* [ ] La cobertura corresponde a lógica real
+* [ ] No se infló cobertura con tests triviales
+* [ ] Las rutas críticas están cubiertas
+* [ ] Excepciones están cubiertas
+
+---
+
+## 6. Mantenibilidad del código de pruebas
+
+### Legibilidad
+
+* [ ] Los nombres son autoexplicativos
+* [ ] No hay duplicación
+* [ ] Existe refactorización
+* [ ] Existe reutilización
+
+### Escalabilidad
+
+* [ ] Se pueden agregar pruebas sin romper otras
+* [ ] Existe estructura reutilizable
+* [ ] Existen helpers o fixtures
+
+---
+
+## 7. Uso correcto de IA (Copiloto)
+
+### Buen uso
+
+* [ ] El código generado fue revisado
+* [ ] Se corrigieron errores del código generado
+* [ ] Se mejoraron nombres de pruebas
+* [ ] Se eliminaron redundancias
+* [ ] No se pegó código sin comprenderlo
+
+### Mal uso (debe NO ocurrir)
+
+* [ ] Tests gigantes generados automáticamente
+* [ ] Tests que no fallan nunca
+* [ ] Código innecesariamente complejo
+* [ ] Pruebas duplicadas
+
+---
+
+## 8. Calidad profesional final
+
+El sistema de pruebas:
+
+* [ ] Detecta errores reales si el sistema se rompe
+* [ ] Sirve para refactorizar sin miedo
+* [ ] Podría ejecutarse en integración continua
+* [ ] Tiene valor en un entorno empresarial
+* [ ] No es solo para pasar la materia
+
+---
+
+## Resultado de evaluación
+
+| Nivel      | Interpretación                  |
+| ---------- | ------------------------------- |
+| 90% – 100% | Calidad profesional             |
+| 75% – 89%  | Aceptable pero frágil           |
+| 60% – 74%  | Académico, no productivo        |
+| < 60%      | No cumple propósito del testing |
+
+---

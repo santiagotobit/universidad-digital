@@ -1,0 +1,41 @@
+{
+  "validTask": {
+    "id": 1,
+    "title": "Test Task",
+    "description": "This is a test task",
+    "status": "pending",
+    "priority": "high",
+    "created_at": "2024-02-01T10:00:00Z",
+    "updated_at": "2024-02-01T10:00:00Z",
+    "created_by": 1
+  },
+  "validTaskWithDueDate": {
+    "id": 2,
+    "title": "Task with Due Date",
+    "description": "Task that needs to be completed by a certain date",
+    "status": "pending",
+    "priority": "medium",
+    "due_date": "2024-12-31T23:59:59Z",
+    "created_at": "2024-02-01T10:00:00Z",
+    "updated_at": "2024-02-01T10:00:00Z",
+    "created_by": 1
+  },
+  "completedTask": {
+    "id": 3,
+    "title": "Completed Task",
+    "description": "Task that has been completed",
+    "status": "completed",
+    "priority": "low",
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-02-01T10:00:00Z",
+    "created_by": 1
+  },
+  "invalidTaskMinimalData": {
+    "title": "",
+    "description": ""
+  },
+  "invalidTaskLongTitle": {
+    "title": "a".repeat(500),
+    "description": "Test"
+  }
+}

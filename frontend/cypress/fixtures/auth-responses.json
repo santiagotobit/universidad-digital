@@ -1,0 +1,32 @@
+{
+  "successfulLogin": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    "token_type": "bearer"
+  },
+  "invalidCredentials": {
+    "detail": "Invalid email or password"
+  },
+  "emptyFieldsError": {
+    "detail": [
+      {
+        "type": "value_error",
+        "loc": ["body", "email"],
+        "msg": "Email is required"
+      },
+      {
+        "type": "value_error",
+        "loc": ["body", "password"],
+        "msg": "Password is required"
+      }
+    ]
+  },
+  "userNotFoundError": {
+    "detail": "User not found"
+  },
+  "inactiveUserError": {
+    "detail": "User is inactive"
+  },
+  "tokenExpiredError": {
+    "detail": "Token has expired"
+  }
+}
