@@ -20,6 +20,8 @@ export interface StudentStats {
   total_grades: number;
   average_grade: number | null;
   current_subjects: number;
+  enrolled_subjects?: StudentSubject[];
+  grades?: StudentGrade[];
 }
 
 export interface TeacherSubject {
@@ -42,6 +44,21 @@ export interface TeacherGrade {
   student_id: number;
   student_name: string;
   subject_id: number;
+  subject_name: string;
+  value: number | null;
+  notes: string | null;
+}
+
+export interface StudentSubject {
+  id: number;
+  code: string;
+  name: string;
+  credits: number;
+  is_active: boolean;
+}
+
+export interface StudentGrade {
+  id: number;
   subject_name: string;
   value: number | null;
   notes: string | null;
