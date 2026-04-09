@@ -14,13 +14,13 @@ _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
     """Genera un hash seguro para contraseñas."""
-
+    password = password[:72]  # bcrypt solo admite hasta 72 bytes
     return _pwd_context.hash(password)
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
     """Verifica una contraseña contra su hash."""
-
+    password = password[:72]  # bcrypt solo admite hasta 72 bytes
     return _pwd_context.verify(password, hashed_password)
 
 
