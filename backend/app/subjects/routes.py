@@ -17,7 +17,7 @@ from app.subjects.services import (
 router = APIRouter(prefix="/subjects", tags=["subjects"])
 
 
-@router.post("/", response_model=SubjectResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SubjectResponse, status_code=status.HTTP_201_CREATED)
 def create_subject_endpoint(
     payload: SubjectCreate,
     db: Session = Depends(get_db),
@@ -26,7 +26,7 @@ def create_subject_endpoint(
     return create_subject(db, payload)
 
 
-@router.get("/", response_model=list[SubjectResponse])
+@router.get("", response_model=list[SubjectResponse])
 def list_subjects_endpoint(
     db: Session = Depends(get_db),
     _user=Depends(require_roles_dep("Administrador", "Docente", "Estudiante")),

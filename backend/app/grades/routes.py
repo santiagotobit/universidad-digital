@@ -11,7 +11,7 @@ from app.grades.services import create_grade, delete_grade, get_grade, list_grad
 router = APIRouter(prefix="/grades", tags=["grades"])
 
 
-@router.post("/", response_model=GradeResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=GradeResponse, status_code=status.HTTP_201_CREATED)
 def create_grade_endpoint(
     payload: GradeCreate,
     db: Session = Depends(get_db),
@@ -20,7 +20,7 @@ def create_grade_endpoint(
     return create_grade(db, payload)
 
 
-@router.get("/", response_model=list[GradeResponse])
+@router.get("", response_model=list[GradeResponse])
 def list_grades_endpoint(
     db: Session = Depends(get_db),
     user=Depends(get_current_user_dep),

@@ -5,6 +5,7 @@ import { StatCard } from "../../components/StatCard";
 import { Spinner } from "../../components/Spinner";
 import { Alert } from "../../components/Alert";
 import { getDashboardStats, type DashboardStats } from "../../services/statsService";
+import { getErrorMessage, getStatusCode } from "../../utils/apiError";
 import { useToast } from "../../hooks/useToast";
 
 export function AdminDashboard() {
@@ -23,17 +24,12 @@ export function AdminDashboard() {
         const data = await getDashboardStats();
         setStats(data);
       } catch (err) {
-        let message = "Error al cargar estadísticas";
-
-        if (err instanceof Error) {
-          const response = (err as any).response;
-          if (response?.status === 403) {
-            message = "No tienes permisos para acceder a las estadísticas. Asegúrate de ser administrador.";
-          } else if (response?.status === 401) {
-            message = "No estás autenticado. Por favor inicia sesión primero.";
-          } else {
-            message = err.message;
-          }
+        const status = getStatusCode(err);
+        let message = getErrorMessage(err, "Error al cargar estadísticas.");
+        if (status === 403) {
+          message = "No tienes permisos para acceder a las estadísticas. Asegúrate de ser administrador.";
+        } else if (status === 401) {
+          message = "No estás autenticado. Por favor inicia sesión primero.";
         }
 
         setError(message);

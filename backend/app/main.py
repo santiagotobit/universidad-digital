@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI, Request
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -38,14 +41,25 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+logger = logging.getLogger(__name__)
+
+
 @app.on_event("startup")
 def on_startup() -> None:
-    init_db()
-    db = SessionLocal()
     try:
-        ensure_default_roles(db)
-    finally:
-        db.close()
+        init_db()
+        db = SessionLocal()
+        try:
+            ensure_default_roles(db)
+        finally:
+            db.close()
+    except Exception:
+        logger.exception(
+            "No se pudo inicializar la base de datos al arrancar. "
+            "Revisa APP_DATABASE_URL, red (Cloud SQL: IP autorizada o Auth Proxy) y opcional APP_DATABASE_SSL_MODE."
+        )
+        if settings.is_production:
+            raise
 
 
 @app.exception_handler(NotFoundError)
@@ -76,6 +90,56 @@ def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
 @app.exception_handler(RequestValidationError)
 def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
+
+@app.exception_handler(ProgrammingError)
+def database_schema_handler(request: Request, exc: ProgrammingError) -> JSONResponse:
+    logger.exception("Error de esquema SQL: %s", exc)
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": (
+                "La base de datos no coincide con el esquema esperado (tabla o columna faltante). "
+                "Si al arrancar falló init_db, crea las tablas con Alembic o deja que el backend "
+                "conecte bien a la BD y reinicia. Detalle técnico en logs del servidor."
+            )
+        },
+    )
+
+
+@app.exception_handler(IntegrityError)
+def database_integrity_handler(request: Request, exc: IntegrityError) -> JSONResponse:
+    logger.exception("Restricción de integridad: %s", exc)
+    return JSONResponse(
+        status_code=409,
+        content={
+            "detail": (
+                "No se pudo guardar por una restricción en la base de datos "
+                "(dato duplicado, clave foránea inválida, etc.)."
+            )
+        },
+    )
+
+
+@app.exception_handler(OperationalError)
+def database_unavailable_handler(request: Request, exc: OperationalError) -> JSONResponse:
+    logger.exception("Error de base de datos: %s", exc)
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": (
+                "No se pudo conectar a la base de datos. "
+                "En Google Cloud SQL: añade tu IP pública en «Redes autorizadas», "
+                "prueba APP_DATABASE_SSL_MODE=require, o usa Cloud SQL Auth Proxy en local."
+            )
+        },
+    )
+
+
+@app.exception_handler(Exception)
+def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Error no controlado: %s", exc)
+    return JSONResponse(status_code=500, content={"detail": "Error interno del servidor."})
 
 
 app.include_router(auth_router)

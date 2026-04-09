@@ -45,6 +45,9 @@ class Settings(BaseSettings):
 
     auto_create_tables: bool = True
 
+    # Cloud SQL / Postgres remoto: suele requerir TLS (libpq: sslmode=require).
+    database_ssl_mode: str | None = Field(default=None, validation_alias="APP_DATABASE_SSL_MODE")
+
     @property
     def is_production(self) -> bool:
         return self.env.lower() == "production"

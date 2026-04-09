@@ -12,7 +12,7 @@ from app.users.models import User
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-@router.get("/", response_model=list[TaskResponse])
+@router.get("", response_model=list[TaskResponse])
 def list_tasks_endpoint(
     search: str | None = None,
     status: str | None = None,
@@ -54,7 +54,7 @@ def get_task_endpoint(
     )
 
 
-@router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task_endpoint(
     payload: TaskCreate,
     db: Session = Depends(get_db),

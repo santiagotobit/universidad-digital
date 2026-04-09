@@ -10,7 +10,25 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_engine(settings.database_url, pool_pre_ping=True)
+def _connect_args() -> dict:
+    args: dict = {"connect_timeout": 10}
+    if settings.database_ssl_mode:
+        args["sslmode"] = settings.database_ssl_mode
+    return args
+
+
+# Cloud SQL / redes "inestables" suelen cortar conexiones o colgar handshakes.
+# Estos parámetros buscan: detectar conexiones muertas (pre_ping), reciclarlas,
+# evitar esperas largas y mantener keepalives a nivel TCP.
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    connect_args=_connect_args(),
+)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
 
 

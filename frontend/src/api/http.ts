@@ -10,7 +10,9 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
 
 export const http = axios.create({
   baseURL: apiBaseUrl,
-  withCredentials: true
+  withCredentials: true,
+  // Cloud SQL / red remota: varias consultas seguidas pueden superar 10s.
+  timeout: 45000,
 });
 
 http.interceptors.request.use((config) => {
@@ -30,7 +32,9 @@ http.interceptors.response.use(
     if (error?.response?.status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    if (error?.response?.status >= 500) {
+    // 503 = BD u otro servicio caído: mostrar el mensaje del backend, no la página genérica /500
+    const st = error?.response?.status;
+    if (st !== undefined && st >= 500 && st !== 503) {
       window.location.assign("/500");
     }
     return Promise.reject(error);
