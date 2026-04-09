@@ -69,7 +69,7 @@ def get_student_stats(db: Session, user_id: int) -> dict:
     ).scalar() or 0
 
     # Contar calificaciones
-    grades = db.query(func.count(Grade.id)).filter(
+    total_grades = db.query(func.count(Grade.id)).filter(
         Grade.enrollment_id.in_(
             db.query(Enrollment.id).filter(Enrollment.user_id == user_id)
         )
@@ -99,11 +99,48 @@ def get_student_stats(db: Session, user_id: int) -> dict:
         )
     ).scalar() or 0
 
+    # Obtener asignaturas inscritas
+    enrolled_subjects = (
+        db.query(Subject)
+        .join(Enrollment, Enrollment.subject_id == Subject.id)
+        .filter(Enrollment.user_id == user_id)
+        .all()
+    )
+
+    # Obtener calificaciones
+    grade_records = (
+        db.query(Grade, Subject)
+        .join(Enrollment, Grade.enrollment_id == Enrollment.id)
+        .join(Subject, Enrollment.subject_id == Subject.id)
+        .filter(Enrollment.user_id == user_id)
+        .order_by(Grade.id)
+        .all()
+    )
+
     return {
         "total_enrollments": enrollments,
-        "total_grades": grades,
+        "total_grades": total_grades,
         "average_grade": round(float(avg_grade), 2) if avg_grade else 0,
         "current_subjects": current_subjects,
+        "enrolled_subjects": [
+            {
+                "id": subject.id,
+                "code": subject.code,
+                "name": subject.name,
+                "credits": subject.credits,
+                "is_active": subject.is_active,
+            }
+            for subject in enrolled_subjects
+        ],
+        "grades": [
+            {
+                "id": grade.id,
+                "subject_name": subject.name,
+                "value": grade.value,
+                "notes": grade.notes,
+            }
+            for grade, subject in grade_records
+        ],
     }
 
 

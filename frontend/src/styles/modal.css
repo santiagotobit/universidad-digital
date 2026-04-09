@@ -11,6 +11,11 @@
   z-index: 2000;
 }
 
+.modal-confirm .modal-overlay {
+  align-items: flex-start;
+  padding-top: 100px;
+}
+
 .modal {
   background: var(--bg-white);
   border-radius: var(--radius-lg);

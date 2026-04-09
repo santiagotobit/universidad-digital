@@ -271,10 +271,17 @@ main {
 .alert {
   padding: 12px 16px;
   border-radius: var(--radius-md);
-  margin-bottom: 16px;
+  margin: 0 auto 16px auto;
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .alert.alert-error {
@@ -303,12 +310,26 @@ main {
 
 .alert-icon {
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .alert-content {
   flex: 1;
-  line-height: 1.5;
+  line-height: 1.6;
+  min-width: 200px;
+}
+
+.alert-content strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.alert-content p {
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 .alert-close {
@@ -317,14 +338,68 @@ main {
   color: currentColor;
   cursor: pointer;
   font-size: 18px;
-  padding: 0;
+  padding: 4px;
   flex-shrink: 0;
   opacity: 0.7;
   transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .alert-close:hover {
   opacity: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .alert {
+    padding: 10px 12px;
+    gap: 10px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .alert-icon {
+    font-size: 18px;
+  }
+
+  .alert-content {
+    min-width: 100%;
+  }
+
+  .alert-content strong {
+    font-size: 0.9rem;
+  }
+
+  .alert-content p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .alert {
+    padding: 8px 10px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .alert-icon {
+    font-size: 16px;
+  }
+
+  .alert-content strong {
+    font-size: 0.85rem;
+  }
+
+  .alert-content p {
+    font-size: 0.8rem;
+  }
+
+  .alert-close {
+    font-size: 16px;
+    padding: 2px;
+  }
 }
 
 /* Accessibility */
@@ -536,8 +611,8 @@ main {
 .py-1 { padding-top: 8px; padding-bottom: 8px; }
 .py-2 { padding-top: 16px; padding-bottom: 16px; }
 .py-3 { padding-top: 24px; padding-bottom: 24px; }
-  gap: 8px;
-}
+  /* gap: 8px; */
+/* } */
 
 .sidebar-link {
   display: block;
