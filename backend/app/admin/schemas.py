@@ -3,6 +3,27 @@ from __future__ import annotations
 from pydantic import BaseModel, EmailStr
 
 
+class StudentSubjectResponse(BaseModel):
+    id: int
+    code: str
+    name: str
+    credits: int
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class StudentGradeResponse(BaseModel):
+    id: int
+    subject_name: str
+    value: float | None = None
+    notes: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 class StudentStatsResponse(BaseModel):
     """Respuesta de estadísticas del estudiante."""
 
@@ -10,6 +31,8 @@ class StudentStatsResponse(BaseModel):
     total_grades: int
     average_grade: float
     current_subjects: int
+    enrolled_subjects: list[StudentSubjectResponse] = []
+    grades: list[StudentGradeResponse] = []
 
     class Config:
         from_attributes = True

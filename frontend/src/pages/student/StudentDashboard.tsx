@@ -5,6 +5,7 @@ import { getStudentStats } from "../../services/statsService";
 import { StatCard } from "../../components/StatCard";
 import { Spinner } from "../../components/Spinner";
 import { Alert } from "../../components/Alert";
+import { Table } from "../../components/Table";
 import { BookOpen, FileText, TrendingUp, Clock } from "lucide-react";
 import "../../styles/stats.css";
 
@@ -13,6 +14,23 @@ interface StudentStats {
   total_grades: number;
   average_grade: number | null;
   current_subjects: number;
+  enrolled_subjects?: StudentSubject[];
+  grades?: StudentGrade[];
+}
+
+interface StudentSubject {
+  id: number;
+  code: string;
+  name: string;
+  credits: number;
+  is_active: boolean;
+}
+
+interface StudentGrade {
+  id: number;
+  subject_name: string;
+  value: number | null;
+  notes: string | null;
 }
 
 export function StudentDashboard() {
@@ -128,6 +146,48 @@ export function StudentDashboard() {
           </ul>
         </div>
       </div>
+
+      <section className="dashboard-details">
+        <div className="details-card">
+          <h2>Asignaturas inscritas</h2>
+          {(stats.enrolled_subjects?.length ?? 0) === 0 ? (
+            <p>No tienes asignaturas inscritas.</p>
+          ) : (
+            <Table
+              caption="Asignaturas inscritas"
+              data={stats.enrolled_subjects || []}
+              columns={[
+                { header: "ID", render: (subject) => subject.id },
+                { header: "Código", render: (subject) => subject.code },
+                { header: "Nombre", render: (subject) => subject.name },
+                { header: "Créditos", render: (subject) => subject.credits },
+                {
+                  header: "Activa",
+                  render: (subject) => (subject.is_active ? "Sí" : "No"),
+                },
+              ]}
+            />
+          )}
+        </div>
+
+        <div className="details-card">
+          <h2>Mis calificaciones</h2>
+          {(stats.grades?.length ?? 0) === 0 ? (
+            <p>No hay calificaciones registradas aún.</p>
+          ) : (
+            <Table
+              caption="Calificaciones del estudiante"
+              data={stats.grades || []}
+              columns={[
+                { header: "ID", render: (grade) => grade.id },
+                { header: "Asignatura", render: (grade) => grade.subject_name },
+                { header: "Nota", render: (grade) => (grade.value ?? "-") },
+                { header: "Notas", render: (grade) => grade.notes ?? "-" },
+              ]}
+            />
+          )}
+        </div>
+      </section>
     </div>
   );
 }
