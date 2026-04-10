@@ -24,6 +24,8 @@ def login_endpoint(
 ) -> TokenResponse:
     user = authenticate_user(db, payload.email, payload.password)
     token, jti, expires_at = create_token_for_user(user)
+    # Sin domain: la cookie queda ligada al host real del navegador (localhost o 127.0.0.1).
+    # domain="localhost" rompe el login si abres Vite en http://127.0.0.1:3000.
     response.set_cookie(
         key=settings.cookie_name,
         value=token,
@@ -31,7 +33,7 @@ def login_endpoint(
         secure=settings.cookie_secure,
         samesite=settings.cookie_samesite,
         max_age=settings.jwt_expiration_minutes * 60,
-        domain="localhost" if not settings.is_production else None,
+        path="/",
     )
     return TokenResponse(access_token=token)
 
@@ -49,7 +51,7 @@ def logout_endpoint(
             revoke_token(db, jti, expires_at)
         except Exception:  # noqa: BLE001
             pass
-    response.delete_cookie(settings.cookie_name, domain="localhost" if not settings.is_production else None)
+    response.delete_cookie(settings.cookie_name, path="/")
     # Ensure the response has an explicit status code (avoid None in ASGI send)
     response.status_code = status.HTTP_204_NO_CONTENT
     return response

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class SubjectCreate(BaseModel):
@@ -12,6 +12,14 @@ class SubjectCreate(BaseModel):
     name: str = Field(min_length=3, max_length=150)
     credits: int = Field(ge=1, le=30)
     teacher_id: int | None = Field(default=None, ge=1)
+
+    @field_validator("code")
+    @classmethod
+    def normalize_code(cls, value: str) -> str:
+        code = value.strip().upper()
+        if not code:
+            raise ValueError("El código es obligatorio.")
+        return code
 
 
 class SubjectUpdate(BaseModel):

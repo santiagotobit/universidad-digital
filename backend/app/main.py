@@ -4,7 +4,7 @@ import logging
 
 from fastapi import FastAPI, Request
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -92,6 +92,22 @@ def validation_error_handler(request: Request, exc: RequestValidationError) -> J
     return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
 
+@app.exception_handler(ValueError)
+def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
+    """p. ej. validadores SQLAlchemy (@validates) en modelos."""
+    logger.warning("ValueError en request: %s", exc)
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+
+@app.exception_handler(ResponseValidationError)
+def response_validation_error_handler(request: Request, exc: ResponseValidationError) -> JSONResponse:
+    logger.exception("La respuesta no coincide con response_model: %s", exc)
+    detail: str | list = (
+        exc.errors() if not settings.is_production else "Respuesta inválida del servidor (revisa modelos vs base de datos)."
+    )
+    return JSONResponse(status_code=500, content={"detail": detail})
+
+
 @app.exception_handler(ProgrammingError)
 def database_schema_handler(request: Request, exc: ProgrammingError) -> JSONResponse:
     logger.exception("Error de esquema SQL: %s", exc)
@@ -110,15 +126,15 @@ def database_schema_handler(request: Request, exc: ProgrammingError) -> JSONResp
 @app.exception_handler(IntegrityError)
 def database_integrity_handler(request: Request, exc: IntegrityError) -> JSONResponse:
     logger.exception("Restricción de integridad: %s", exc)
-    return JSONResponse(
-        status_code=409,
-        content={
-            "detail": (
-                "No se pudo guardar por una restricción en la base de datos "
-                "(dato duplicado, clave foránea inválida, etc.)."
-            )
-        },
+    detail = (
+        "No se pudo guardar por una restricción en la base de datos "
+        "(dato duplicado, clave foránea inválida, etc.)."
     )
+    if not settings.is_production:
+        orig = getattr(exc, "orig", None)
+        if orig is not None:
+            detail = f"{detail} [{orig}]"[:900]
+    return JSONResponse(status_code=409, content={"detail": detail})
 
 
 @app.exception_handler(OperationalError)
@@ -139,7 +155,10 @@ def database_unavailable_handler(request: Request, exc: OperationalError) -> JSO
 @app.exception_handler(Exception)
 def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.exception("Error no controlado: %s", exc)
-    return JSONResponse(status_code=500, content={"detail": "Error interno del servidor."})
+    detail = "Error interno del servidor."
+    if not settings.is_production:
+        detail = f"{type(exc).__name__}: {exc}"[:800]
+    return JSONResponse(status_code=500, content={"detail": detail})
 
 
 app.include_router(auth_router)
