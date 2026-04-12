@@ -16,12 +16,16 @@ from app.users.models import User
 
 def authenticate_user(db: Session, email: str, password: str) -> User:
     """Valida credenciales y estado del usuario."""
-    user = db.scalar(select(User).where(User.email == email.lower().strip()))
-    if not user or not verify_password(password, user.hashed_password):
-        raise UnauthorizedError("Credenciales inválidas.")
-    if not user.is_active:
-        raise ForbiddenError("Usuario inactivo.")
-    return user
+    try:
+        user = db.scalar(select(User).where(User.email == email.lower().strip()))
+        if not user or not verify_password(password, user.hashed_password):
+            raise UnauthorizedError("Credenciales inválidas.")
+        if not user.is_active:
+            raise ForbiddenError("Usuario inactivo.")
+        return user
+    except Exception as exc:
+        raise UnauthorizedError("Error al autenticar.") from exc
+    
 
 
 def create_token_for_user(user: User) -> tuple[str, str, datetime]:

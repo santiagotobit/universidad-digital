@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+import bcrypt
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -20,8 +21,13 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     """Verifica una contraseña contra su hash."""
-    password = password[:72]  # bcrypt solo admite hasta 72 bytes
-    return _pwd_context.verify(password, hashed_password)
+    password = password.encode()[:72] # bcrypt solo admite hasta 72 bytes
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+
+    return bcrypt.checkpw(password, hashed_password)
 
 
 def create_access_token(subject: str, jti: str, expires_minutes: int | None = None) -> str:
